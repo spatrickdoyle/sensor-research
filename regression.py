@@ -22,7 +22,7 @@ def calc_exact(degree,xx,yy):
 	if len(x) <= degree:
 		return "ERROR: Degree must be less than the number of data points given!"
 
-	return np.linalg.inv(np.transpose(X)*X)*(np.transpose(X)*y)
+	return [i[0] for i in (np.linalg.inv(np.transpose(X)*X)*(np.transpose(X)*y)).tolist()]
 
 def calc_int(degree,xx,yy):
 
@@ -88,4 +88,4 @@ def classification(xx,yy):
 
 	return [round(result[i],3) for i in range(len(result))]
 
-print calc_exact(3,[1,2,3,4,5],[0,0,0,1,1])
+#print calc_exact(3,[1,2,3,4,5],[0,0,0,1,1])
