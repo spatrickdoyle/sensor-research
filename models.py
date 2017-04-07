@@ -2,12 +2,6 @@ import math
 import numpy as np
 import scipy.special as sp
 
-#Change the intensity of the color in the plot to reflect the certainty of the classification
-#Create plots from 'average' values with standard deviation lines
-#Create a way to save and load models with json files
-#Measure the percent change in error for each added coefficient and weight the sum
-#Create an accurate distribution of 0th order coefficients
-
 PI = 3.1415926535
 E = 2.71828
 
@@ -23,8 +17,6 @@ def c0_(m,T,X,Y):
 
 #General formula for finding the probability a value falls within a normal distribution
 def f_(x,mu,sig):
-    #return 1 - 0.5*( sp.erf(np.abs(x-mu)/(sig*math.sqrt(2))) - sp.erf(-np.abs(x-mu)/(sig*math.sqrt(2))) )
-    #return (1/math.sqrt(2*PI*(sig**2)))*E**(-((x-mu)**2)/(2*(sig**2)))
     return (E**(-(np.absolute(x)**2)/(2*(sig**2))))/(2*PI*(sig**2))
         
 
@@ -117,8 +109,6 @@ class Model:
                     #Find the mean of this nth order coefficient
                     mean = np.average(coefs)#sum(coefs)/len(coefs)
                     #And the standard deviation
-                    #sigma = np.sqrt(sum([i**2 for i in coefs])/len(coefs) - mean**2)
-                    #sigma = np.sqrt(sum([np.real(i)**2 for i in coefs])/len(coefs) - mean**2)
                     sigma = math.sqrt(0.5*(sum([np.real(i)**2 for i in coefs])/len(coefs) + sum([np.real(i)**2 for i in coefs])/len(coefs)))
 
                     #Save it into a big matrix
@@ -134,7 +124,5 @@ class Model:
                     sigs = [i[1] for i in self.model[row][col]]
 
                     likelihood = sum([f_(coefs[order],means[order],sigs[order]) for order in range(self.rang[0]-1,self.rang[1]-1)])/self.order
-                    #likelihood = sum([np.real(f_(np.real(coefs[order]),np.real(means[order]),sigs[order])) for order in range(self.rang[0]-1,self.rang[1]-1)])/self.order
 
                     s.addClass(row,col,self.classification,likelihood)
-                    #print row,col,s.likelihoods[row][col][-1]
