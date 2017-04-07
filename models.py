@@ -2,7 +2,9 @@ import math
 import numpy as np
 import scipy.special as sp
 
-#Create plots from 'average' values
+#Change the intensity of the color in the plot to reflect the certainty of the classification
+#Create plots from 'average' values with standard deviation lines
+#Create a way to save and load models with json files
 #Measure the percent change in error for each added coefficient and weight the sum
 #Create an accurate distribution of 0th order coefficients
 
@@ -74,27 +76,19 @@ class Sweep:
     def genClass(self):
         return [[self.getClass(i,j) for j in range(self.size)] for i in range(self.size)]
 
-    def c(self,n):
+    def c(self,n,row,col):
         #return order n coefficients for this sweep as a matrix of complex numbers
         m = 401
         X = range(401)
         C = []
         T = X[m-1]-X[0]
         w = (2*PI)/T
+
+        Y = self.data[row][col]
         if n != 0:
-            for i in self.data:
-                tmp = []
-                for Y in i:
-                    tmp.append(c_(n,m,T,w,X,Y))
-                C.append(tmp)
+            C = c_(n,m,T,w,X,Y)
         else:
-            for i in self.data:
-                tmp = []
-                for Y in i:
-                    #tmp.append(Y[0])
-                    #print c0_(m,T,X,Y)
-                    tmp.append(c0_(m,T,X,Y))
-                C.append(tmp)
+            C = c0_(m,T,X,Y)
         return C
 
 
@@ -119,9 +113,9 @@ class Model:
             for col in range(sweeps[0].size):
                 for order in range(self.rang[0],self.rang[1]):
                     #Generate a list of coefficients of a specific order for each sweep
-                    coefs = [s.c(order)[row][col] for s in sweeps]
+                    coefs = [s.c(order,row,col) for s in sweeps]
                     #Find the mean of this nth order coefficient
-                    mean = sum(coefs)/len(coefs)
+                    mean = np.average(coefs)#sum(coefs)/len(coefs)
                     #And the standard deviation
                     #sigma = np.sqrt(sum([i**2 for i in coefs])/len(coefs) - mean**2)
                     #sigma = np.sqrt(sum([np.real(i)**2 for i in coefs])/len(coefs) - mean**2)
@@ -135,7 +129,7 @@ class Model:
         for s in sweeps:
             for row in range(sweeps[0].size):
                 for col in range(sweeps[0].size):
-                    coefs = [s.c(i)[row][col] for i in range(self.rang[0],self.rang[1])] #List of coefficients for the test sweep, where the order is the index+1
+                    coefs = [s.c(i,row,col) for i in range(self.rang[0],self.rang[1])] #List of coefficients for the test sweep, where the order is the index+1
                     means = [i[0] for i in self.model[row][col]]
                     sigs = [i[1] for i in self.model[row][col]]
 
@@ -144,16 +138,3 @@ class Model:
 
                     s.addClass(row,col,self.classification,likelihood)
                     #print row,col,s.likelihoods[row][col][-1]
-
-    def avgPlot(self,x):
-        #Function using the mean coefficients of the first index of the model
-        m = 4
-        X = range(m)
-        T = X[m-1]-X[0]
-        w = (2*PI)/T
-
-        print "Mean %d"%x
-        print sum([ (-np.real(self.model[0][0][-(n+1)][0]) + np.imag(self.model[0][0][-(n+1)][0])*1j)*(E**(1j*n*w*x)) for n in range(-self.order,0)]),sum([ (self.model[0][0][n-1][0])*(E**(1j*n*w*x)) for n in range(1,self.order+1)])
-        print sum([ (-np.real(self.model[0][0][-(n+1)][0]) + np.imag(self.model[0][0][-(n+1)][0])*1j)*(E**(1j*n*w*x)) for n in range(-self.order,0)])+sum([ (self.model[0][0][n-1][0])*(E**(1j*n*w*x)) for n in range(1,self.order+1)])
-
-        return sum([ (-np.real(self.model[0][0][-(n+1)][0]) + np.imag(self.model[0][0][-(n+1)][0])*1j)*(E**(1j*n*w*x)) for n in range(-self.order,0)]) + sum([ (self.model[0][0][n-1][0])*(E**(1j*n*w*x)) for n in range(1,self.order+1)])
