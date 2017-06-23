@@ -2,8 +2,8 @@ import math
 import numpy as np
 import scipy.special as sp
 
-PI = 3.1415926535
-E = 2.71828
+PI = np.pi
+E = np.e
 
 #Heaviside step function, half-maximum convention
 step = lambda x: 0.0 if x < 0 else 1.0 if x > 0 else 0.5
